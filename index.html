@@ -1,0 +1,221 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        margin: 40px;
+      }
+
+      .maincontainer, .resultContainer {
+        display: flex;
+        flex-direction: row;
+      }
+      .numcontainer {
+        display: flex;
+        flex-direction: column;
+      }
+      .questionContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .box {
+        background-color: #444;
+        color: #fff;
+        border-radius: 5px;
+        padding: 20px;
+        font-size: 150%;
+        display: grid;
+        place-items: center;
+        border: none;
+      }
+
+      .box:nth-child(even) {
+        background-color: #ccc;
+        color: #000;
+      }
+
+      .wrapper {
+        width: 400px;
+        display: grid;
+        grid-gap: 10px;
+        grid-template-columns: repeat(3, 100px);
+        grid-template-rows: 100px 100px 100px;
+        grid-auto-flow: column;
+      }
+      #second:before {
+        content: "x";
+        position: relative;
+        left: -20px;
+      }
+      .number {
+        font-size: 450%;
+        color: #333;
+        padding-left: 40px;
+        font-family: cursive;
+        width: 80px;
+        text-align: right;
+      }
+      .zero {
+        width: 320px;
+        margin-top: 10px;
+      }
+      #result {
+        border: none;
+        border-top: 4px solid #333;
+        width: 180px;
+        text-align: right;
+        font-size: 450%;
+      }
+      #good, #bad {
+          display: none;
+      }
+      #nextContent {
+          font-size: 200%;
+          color: red;
+          font-weight: bold;
+          font-family: Cursive;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mainPage" class="maincontainer">
+      <div class="numcontainer">
+        <div class="wrapper">
+          <button class="box">7</button>
+          <button class="box">4</button>
+          <button class="box">1</button>
+          <button class="box">8</button>
+          <button class="box">5</button>
+          <button class="box">2</button>
+          <button class="box">9</button>
+          <button class="box">6</button>
+          <button class="box">3</button>
+        </div>
+        <button class="zero box">0</button>
+      </div>
+      <div class="questionContainer">
+        <div id="first" class="number">1</div>
+        <div id="second" class="number">2</div>
+        <div class="resultContainer"><input type="number" min="0" max="99" id="result" readonly></input><span id="good" style="color:green; font-size:450%">&check;</span><span id="bad" style="color:red; font-size:300%">&#10006;</span></div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+        reset();
+        var counter = 0, correctCount = 0, wrongCount = 0;
+        /*document.getElementById("result").addEventListener("keyup", function() {
+
+        })*/
+        function isCorrect(first, second, product) {
+            return first * second === product;
+        }
+        function partiallyCorrect(first, second, product) {
+            return first*second > 9 && (Math.floor(first*second/10) === product);
+        }
+        var playSound = (function beep() {
+            var snd = new Audio("data:audio/wav;base64,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qJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=");  
+            return function() {     
+                snd.play(); 
+            }
+        })();        
+
+        var playBad = (function beep() {
+            var snd = new Audio("data:audio/mpeg;base64,/+MYxAAEaAIEeUAQAgBgNgP/////KQQ/////Lvrg+lcWYHgtjadzsbTq+yREu495tq9c6v/7vt/of7mna9v6/btUnU17Jun9/+MYxCkT26KW+YGBAj9v6vUh+zab//v/96C3/pu6H+pv//r/ycIIP4pcWWTRBBBAMXgNdbRaABQAAABRWKwgjQVX0ECmrb///+MYxBQSM0sWWYI4A++Z/////////////0rOZ3MP//7H44QEgxgdvRVMXHZseL//540B4JAvMPEgaA4/0nHjxLhRgAoAYAgA/+MYxAYIAAJfGYEQAMAJAIAQMAwX936/q/tWtv/2f/+v//6v/+7qTEFNRTMuOTkuNVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
+            return function() {     
+                snd.play(); 
+            }
+        })(); 
+        function showGood() {
+            document.getElementById("good").style.display = "block";
+            document.getElementById("bad").style.display = "none";
+            playSound();
+            correctCount++;
+        }
+        function showBad() {
+            document.getElementById("good").style.display = "none";
+            document.getElementById("bad").style.display = "block";
+            document.getElementById("result").value = "";
+            playBad();
+            wrongCount++;
+        }
+        function hideBothGoodBad() {
+            document.getElementById("good").style.display = "none";
+            document.getElementById("bad").style.display = "none";
+        }
+        function getRandomIntInclusive(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
+          }
+        function showNextPage() {
+            document.getElementById("mainPage").innerHTML = '<div id="nextContent">Wrong: '+wrongCount+'<br/></div>';
+            for (var i=0; i<correctCount; i++) {
+                setTimeout(function() {
+                    var s = document.createElement("SPAN");
+                    s.innerHTML = "&#128515;";
+                    document.getElementById("nextContent").appendChild(s);
+                }, 1000);
+            }
+        }
+        function reset() {
+            document.getElementById("first").innerText = getRandomIntInclusive(0, 9);
+            document.getElementById("second").innerText = getRandomIntInclusive(0, 9);
+            hideBothGoodBad();
+            document.getElementById("result").value = "";
+            counter++;
+            if (counter >= 30) {
+                showNextPage();
+            }
+        }
+
+        document.addEventListener("touchstart", function (ev) {
+            var target = ev.target,
+            result = document.getElementById("result");
+          if (target.className.indexOf("box") > -1)  {
+              if (Number(result.value) > 0 && Number(result.value) < 10 ) {
+                  result.value = result.value + target.innerText;
+              }
+              else {
+                  result.value = target.innerText;
+              }
+              
+              if (isCorrect(Number(document.getElementById('first').innerText), Number(document.getElementById('second').innerText), Number(result.value))) {
+                  showGood();
+                  setTimeout(reset, 500);
+              } else if (partiallyCorrect(Number(document.getElementById('first').innerText), Number(document.getElementById('second').innerText), Number(result.value))) {
+                  hideBothGoodBad();
+              }
+              else {
+                  showBad();
+              }
+          }
+        });
+      document.addEventListener("click", function (ev) {
+          var target = ev.target,
+          result = document.getElementById("result");
+        if (target.className.indexOf("box") > -1)  {
+            if (Number(result.value) > 0 && Number(result.value) < 10 ) {
+                result.value = result.value + target.innerText;
+            }
+            else {
+                result.value = target.innerText;
+            }
+            
+            if (isCorrect(Number(document.getElementById('first').innerText), Number(document.getElementById('second').innerText), Number(result.value))) {
+                showGood();
+                setTimeout(reset, 500);
+            } else if (partiallyCorrect(Number(document.getElementById('first').innerText), Number(document.getElementById('second').innerText), Number(result.value))) {
+                hideBothGoodBad();
+            }
+            else {
+                showBad();
+            }
+        }
+      });
+    </script>
+  </body>
+</html>
