@@ -20,9 +20,9 @@
         --number-padding-left: 40px;
         --number-width: 80px;
         --operator-left: -20px;
-        --result-width: 180px;
+        --result-width: 170px;
         --result-input-border-top: 4px solid #333333;
-        --good-font-size: 400%;
+        --good-font-size: 350%;
         --bad-font-size: 300%;
         --equal-display: none;
         --equal-font-size: 400%;
@@ -77,7 +77,7 @@
       }
 
       label {
-        color: #d49406;
+        color: #d24604;
         display: inline-block;
         cursor: pointer;
         font-weight: bold;
@@ -88,14 +88,14 @@
 
       input[type="radio"]:checked + label {
         color: white;
-        background: #d49406;
+        background: #d24604;
       }
 
       label + input[type="radio"] + label {
-        border-left: solid 3px #d49406;
+        border-left: solid 3px #d24604;
       }
       .radio-group {
-        border: solid 3px #d49406;
+        border: solid 3px #d24604;
         display: inline-block;
         margin: 20px 20px var(--choice-bottom-margin);
         border-radius: 36px;
@@ -112,6 +112,7 @@
         width: var(--result-container-width);
         display: flex;
         flex-direction: row;
+        border-top: var(--result-input-border-top);
       }
       .numcontainer {
         display: flex;
@@ -128,6 +129,7 @@
         display: flex;
         align-items: center;
         width: 30px;
+        padding-left: 6px;
       }
       .box {
         background-color: #444;
@@ -175,7 +177,6 @@
       }
       #result {
         border: none;
-        border-top: var(--result-input-border-top);
         width: var(--result-width);
         text-align: right;
         font-size: var(--question-number-font-size);
@@ -206,13 +207,13 @@
         font-family: Cursive;
       }
       .restartBtn {
-        border: solid 3px #d49406;
+        border: solid 3px #d24604;
         padding: 20px;
         border-radius: 36px;
         overflow: hidden;
         font-size: 20px;
         min-width: 200px;
-        background: #d49406;
+        background: #d24604;
         color: white;
         cursor: pointer;
         margin-bottom: 40px;
