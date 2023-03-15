@@ -13,8 +13,8 @@
         --question-container-flex-direction: column;
         --result-container-width: 220px;
         --wrapper-width: 400px;
-        --number-padding-left: 40px;
-        --number-width: 80px;
+        --number-padding-left: 20px;
+        --number-width: auto; /*80px;*/
         --operator-left: -20px;
         --result-width: 170px;
         --result-input-border-top: 4px solid #333333;
@@ -36,9 +36,9 @@
           --result-container-width: auto;
           --wrapper-width: 320px;
           --number-padding-left: 10px;
-          --number-width: 60px;
+          --number-width: auto; /*60px;*/
           --operator-left: -8px;
-          --result-width: 55px;
+          --result-width: 100px; /*55px;*/
           --result-input-border-top: none;
           --good-font-size: 250%;
           --bad-font-size: 200%;
@@ -80,6 +80,7 @@
         padding: var(--choice-label-padding);
         font-size: var(--choice-label-font-size);
         width: var(--choice-label-width);
+        min-width: 103px;
       }
 
       input[type="radio"]:checked + label {
@@ -89,6 +90,10 @@
 
       label + input[type="radio"] + label {
         border-left: solid 3px #d24604;
+      }
+      label:first-of-type,
+      label:nth-of-type(2) {
+        border-bottom: solid 3px #d24604 !important;
       }
       .radio-group {
         border: solid 3px #d24604;
@@ -113,13 +118,18 @@
       .numcontainer {
         display: flex;
         flex-direction: column;
-        margin-top: 40px;
+        margin: 40px auto 0;
       }
       .questionContainer {
         display: flex;
         flex-direction: var(--question-container-flex-direction);
-        align-items: center;
+        align-items: end;
         justify-content: center;
+        flex-wrap: wrap;
+      }
+      .second-container {
+        display: flex;
+        flex-direction: row;
       }
       #feedbackContainer {
         display: flex;
@@ -149,14 +159,20 @@
         grid-template-rows: 100px 100px 100px;
         grid-auto-flow: column;
       }
-      #second.multiply:before {
+      .operator.multiply:before {
         content: "×";
-        position: relative;
         left: var(--operator-left);
       }
-      #second.divide:before {
+      .operator.divide:before {
         content: "÷";
-        position: relative;
+        left: var(--operator-left);
+      }
+      .operator.add:before {
+        content: "+";
+        left: var(--operator-left);
+      }
+      .operator.subtract:before {
+        content: "-";
         left: var(--operator-left);
       }
       .number {
@@ -231,6 +247,12 @@
   <body>
     <div id="choiceContainer">
       <div class="radio-group">
+        <input type="radio" id="addition" name="choice" /><label for="addition"
+          >Addition</label
+        ><input type="radio" id="subtraction" name="choice" /><label
+          for="subtraction"
+          >Subtraction</label
+        ><br />
         <input type="radio" id="multiplication" name="choice" checked /><label
           for="multiplication"
           >Multiplication</label
@@ -256,7 +278,10 @@
       </div>
       <div class="questionContainer">
         <div id="first" class="number">1</div>
-        <div id="second" class="number multiply">2</div>
+        <div class="second-container">
+          <div id="operator" class="number operator">×</div>
+          <div id="second" class="number">2</div>
+        </div>
         <div class="resultContainer">
           <span id="equal">&#61;</span>
           <input type="text" id="result" readonly />
@@ -276,6 +301,9 @@
           badEl = document.getElementById("bad"),
           mainPage = document.getElementById("mainPage"),
           multiplication = document.getElementById("multiplication"),
+          division = document.getElementById("division"),
+          addition = document.getElementById("addition"),
+          subtraction = document.getElementById("subtraction"),
           choiceContainer = document.getElementById("choiceContainer");
 
         var Multiply = {
@@ -287,11 +315,19 @@
             if (Division.timeoutVar) {
               clearTimeout(Division.timeoutVar);
             }
+            if (Addition.timeoutVar) {
+              clearTimeout(Addition.timeoutVar);
+            }
+            if (Subtraction.timeoutVar) {
+              clearTimeout(Subtraction.timeoutVar);
+            }
             clearTimeout(this.timeoutVar);
             var firstNum = getRandomIntInclusive(0, 9),
               secondNum = getRandomIntInclusive(0, 9);
             first.innerText = this.firstNum = firstNum;
             second.innerText = this.secondNum = secondNum;
+            result.style.width =
+              String(this.getAnswer(firstNum, secondNum)).length * 30 + "px";
           },
           showAnswer: function () {
             var me = this;
@@ -352,11 +388,19 @@
             if (Multiply.timeoutVar) {
               clearTimeout(Multiply.timeoutVar);
             }
+            if (Subtraction.timeoutVar) {
+              clearTimeout(Subtraction.timeoutVar);
+            }
+            if (Addition.timeoutVar) {
+              clearTimeout(Addition.timeoutVar);
+            }
             clearTimeout(this.timeoutVar);
             var secondNum = getRandomIntInclusive(1, 9),
               firstNum = getRandomIntInclusive(1, 9) * secondNum;
             second.innerText = this.secondNum = secondNum;
             first.innerText = this.firstNum = firstNum;
+            result.style.width =
+              String(this.getAnswer(firstNum, secondNum)).length * 30 + "px";
           },
           showAnswer: function () {
             var me = this;
@@ -372,7 +416,12 @@
             return this.getAnswer(first, second) === answer;
           },
           check: function (data) {
-            result.value = data;
+            if (Number(result.value) > 0 && Number(result.value) < 10) {
+              result.value = result.value + data;
+            } else {
+              result.value = data;
+            }
+            // result.value = data;
 
             if (
               this.isCorrect(
@@ -383,6 +432,156 @@
             ) {
               showGood();
               setTimeout(reset, 500);
+            } else {
+              showBad();
+              this.showAnswer();
+            }
+          },
+        };
+
+        var Addition = {
+          timeoutVar: null,
+          getAnswer: function (first, second) {
+            return first + second;
+          },
+          reset: function () {
+            if (Multiply.timeoutVar) {
+              clearTimeout(Multiply.timeoutVar);
+            }
+            if (Division.timeoutVar) {
+              clearTimeout(Division.timeoutVar);
+            }
+            if (Subtraction.timeoutVar) {
+              clearTimeout(Subtraction.timeoutVar);
+            }
+            clearTimeout(this.timeoutVar);
+            var secondNum = getRandomIntInclusive(100, 999),
+              firstNum = getRandomIntInclusive(100, 999); // * secondNum;
+            second.innerText = this.secondNum = secondNum;
+            first.innerText = this.firstNum = firstNum;
+            result.style.width =
+              String(this.getAnswer(firstNum, secondNum)).length * 30 + "px";
+          },
+          showAnswer: function () {
+            var me = this;
+            clearTimeout(this.timeoutVar);
+            this.timeoutVar = setTimeout(function () {
+              result.setAttribute(
+                "placeholder",
+                me.getAnswer(me.firstNum, me.secondNum)
+              );
+            }, 3000);
+          },
+          isCorrect: function (first, second, answer) {
+            return this.getAnswer(first, second) === answer;
+          },
+          partiallyCorrect: function (first, second, sum) {
+            return (
+              Math.floor((first + second) / 1000) === sum ||
+              Math.floor((first + second) / 100) === sum ||
+              Math.floor((first + second) / 10) === sum
+            );
+          },
+          check: function (data) {
+            //if (Number(result.value) > 0 && Number(result.value) < 10) {
+            result.value = result.value + data;
+            //} else {
+            //result.value = data;
+            //}
+
+            if (
+              this.isCorrect(
+                Number(first.innerText),
+                Number(second.innerText),
+                Number(result.value)
+              )
+            ) {
+              showGood();
+              setTimeout(reset, 500);
+            } else if (
+              this.partiallyCorrect(
+                Number(first.innerText),
+                Number(second.innerText),
+                Number(result.value)
+              )
+            ) {
+              hideBothGoodBad();
+            } else {
+              showBad();
+              this.showAnswer();
+            }
+          },
+        };
+
+        var Subtraction = {
+          timeoutVar: null,
+          getAnswer: function (first, second) {
+            return first - second;
+          },
+          reset: function () {
+            if (Multiply.timeoutVar) {
+              clearTimeout(Multiply.timeoutVar);
+            }
+            if (Division.timeoutVar) {
+              clearTimeout(Division.timeoutVar);
+            }
+            if (Addition.timeoutVar) {
+              clearTimeout(Subtraction.timeoutVar);
+            }
+            clearTimeout(this.timeoutVar);
+            let a = getRandomIntInclusive(100, 999),
+              b = getRandomIntInclusive(100, 999);
+            var firstNum = Math.max(a, b);
+            var secondNum = Math.min(a, b);
+            second.innerText = this.secondNum = secondNum;
+            first.innerText = this.firstNum = firstNum;
+            result.style.width =
+              String(this.getAnswer(firstNum, secondNum)).length * 30 + "px";
+          },
+          showAnswer: function () {
+            var me = this;
+            clearTimeout(this.timeoutVar);
+            this.timeoutVar = setTimeout(function () {
+              result.setAttribute(
+                "placeholder",
+                me.getAnswer(me.firstNum, me.secondNum)
+              );
+            }, 3000);
+          },
+          isCorrect: function (first, second, answer) {
+            return this.getAnswer(first, second) === answer;
+          },
+          partiallyCorrect: function (first, second, difference) {
+            return (
+              Math.floor((first - second) / 1000) === difference ||
+              Math.floor((first - second) / 100) === difference ||
+              Math.floor((first - second) / 10) === difference
+            );
+          },
+          check: function (data) {
+            //if (Number(result.value) > 0 && Number(result.value) < 10) {
+            result.value = result.value + data;
+            //} else {
+            //  result.value = data;
+            //}
+
+            if (
+              this.isCorrect(
+                Number(first.innerText),
+                Number(second.innerText),
+                Number(result.value)
+              )
+            ) {
+              showGood();
+              setTimeout(reset, 500);
+            } else if (
+              this.partiallyCorrect(
+                Number(first.innerText),
+                Number(second.innerText),
+                Number(result.value)
+              )
+            ) {
+              hideBothGoodBad();
             } else {
               showBad();
               this.showAnswer();
@@ -458,8 +657,12 @@
         function reset() {
           if (multiplication.checked) {
             Multiply.reset();
-          } else {
+          } else if (division.checked) {
             Division.reset();
+          } else if (addition.checked) {
+            Addition.reset();
+          } else {
+            Subtraction.reset();
           }
           hideBothGoodBad();
           result.value = "";
@@ -476,14 +679,22 @@
             var data = target.innerText;
             if (multiplication.checked) {
               Multiply.check(data);
-            } else {
+            } else if (division.checked) {
               Division.check(data);
+            } else if (addition.checked) {
+              Addition.check(data);
+            } else {
+              Subtraction.check(data);
             }
           } else if (target.matches("input[type='radio']")) {
-            second.className =
+            operator.innerText =
               target.id == "multiplication"
-                ? "number multiply"
-                : "number divide";
+                ? "×"
+                : target.id == "division"
+                ? "÷"
+                : target.id == "addition"
+                ? "+"
+                : "-";
             reset();
           }
         });
