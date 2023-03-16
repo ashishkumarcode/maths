@@ -16,7 +16,7 @@
         --number-padding-left: 20px;
         --number-width: auto; /*80px;*/
         --operator-left: -20px;
-        --result-width: 170px;
+        --result-width: 240px;
         --result-input-border-top: 4px solid #333333;
         --good-font-size: 350%;
         --bad-font-size: 300%;
@@ -113,6 +113,7 @@
         width: var(--result-container-width);
         display: flex;
         flex-direction: row;
+        justify-content: end;
         border-top: var(--result-input-border-top);
       }
       .numcontainer {
@@ -327,7 +328,7 @@
             first.innerText = this.firstNum = firstNum;
             second.innerText = this.secondNum = secondNum;
             result.style.width =
-              String(this.getAnswer(firstNum, secondNum)).length * 30 + "px";
+              String(this.getAnswer(firstNum, secondNum)).length * 0.55 + "em";
           },
           showAnswer: function () {
             var me = this;
@@ -400,7 +401,7 @@
             second.innerText = this.secondNum = secondNum;
             first.innerText = this.firstNum = firstNum;
             result.style.width =
-              String(this.getAnswer(firstNum, secondNum)).length * 30 + "px";
+              String(this.getAnswer(firstNum, secondNum)).length * 0.55 + "em";
           },
           showAnswer: function () {
             var me = this;
@@ -460,7 +461,7 @@
             second.innerText = this.secondNum = secondNum;
             first.innerText = this.firstNum = firstNum;
             result.style.width =
-              String(this.getAnswer(firstNum, secondNum)).length * 30 + "px";
+              String(this.getAnswer(firstNum, secondNum)).length * 0.55 + "em";
           },
           showAnswer: function () {
             var me = this;
@@ -536,7 +537,7 @@
             second.innerText = this.secondNum = secondNum;
             first.innerText = this.firstNum = firstNum;
             result.style.width =
-              String(this.getAnswer(firstNum, secondNum)).length * 30 + "px";
+              String(this.getAnswer(firstNum, secondNum)).length * 0.55 + "em";
           },
           showAnswer: function () {
             var me = this;
